@@ -63,7 +63,6 @@ def init():
 		if isAboutMeTheNewestSubmission() == False :
 			deleteAboutMe()
 			makeAboutMeTheNewestComment()
-		#waitToRefresh()
-		break
+			waitToRefresh()
 
 init()
