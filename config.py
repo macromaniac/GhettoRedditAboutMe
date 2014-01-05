@@ -1,5 +1,6 @@
 username = 'username'
 password = 'password'
-subreddit = 'subreddit_name'
+submissionPermaLink = 'http://www.reddit.com/r/a_movie_called_life/comments/1ugxpz/about_me/'
 
 aboutMe = 'About me text'
+

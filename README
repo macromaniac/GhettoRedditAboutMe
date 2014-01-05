@@ -1,0 +1,9 @@
+This bot checks a users newest submission every X minutes.
+If the submission id does not match the id of the last
+about me comment, then the old about me comment is 
+deleted and a new one is made
+
+The reason for this is to generate a rudimentary 
+about me page.
+
+This relies on reddit PRAW
