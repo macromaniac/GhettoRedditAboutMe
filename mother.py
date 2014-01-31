@@ -1,7 +1,11 @@
 from __future__ import print_function
+import time
 import config
 import botconfig
 import praw
+
+#THE ACRONYM PL IS PERMALINK
+#I Should have written it out, in hindsight
 
 r = praw.Reddit(user_agent = botconfig.botUserAgentExplanation)
 
@@ -23,10 +27,10 @@ def getLastCommentPLFromFile():
 
 def setLastCommentPL(toSet):
 	saveFile = open(botconfig.botSaveFileLocation,'w')
-	print(toSet, file=saveFile)
+	print(toSet, file=saveFile, end="")
 
 def waitToRefresh():
-	sleep(botWaitTimeInMinutes * 60)
+	time.sleep(botconfig.botWaitTimeInMinutes * 60)
 
 def isAboutMeTheNewestSubmission():
 	redditor = r.get_redditor(config.username)
@@ -37,7 +41,7 @@ def isAboutMeTheNewestSubmission():
 		commentPL = comment.permalink
 	for submission in submitted:
 		submissionTime = submission.created_utc
-	if submissionTime!=None and commentTime!=None and commentTime>submissionTime:
+	if submissionTime!=None and commentTime!=None and commentTime<submissionTime:
 		return False
 	if commentPL!=None and commentPL==getLastCommentPLFromFile():
 		return True
@@ -61,8 +65,13 @@ def init():
 	loginToReddit()
 	while True:
 		if isAboutMeTheNewestSubmission() == False :
+			print("AboutMe isn't the newest comment")
 			deleteAboutMe()
 			makeAboutMeTheNewestComment()
-			waitToRefresh()
+		waitToRefresh()
 
-init()
+def tick():
+	loginToReddit()
+	if isAboutMeTheNewestSubmission() == False :
+		deleteAboutMe()
+		makeAboutMeTheNewestComment()
