@@ -28,7 +28,7 @@ def getStringAtIndexFromSaveFile(index):
 		print("MalformatedData in saveFile")
 		return None
 	saveFile.close()
-	return string.split(saveFileString,' ')[index]
+	return fileData.split()[index]
 
 def getLastCommentPLFromFile():
 	return getStringAtIndexFromSaveFile(0)
