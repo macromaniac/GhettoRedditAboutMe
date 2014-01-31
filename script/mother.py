@@ -1,8 +1,7 @@
 from __future__ import print_function
-import time
-import config
-import botconfig
-import praw
+import sys, os, time, praw, re, hashlib
+sys.path.append(os.path.realpath('config_files'))
+import config_files.config as config, config_files.botconfig as botconfig
 
 #THE ACRONYM PL IS PERMALINK
 #I Should have written it out, in hindsight
@@ -16,21 +15,36 @@ def loginToReddit():
 		print("Bot couldn't log in, exiting")
 		sys.exit(1)
 	
-def getLastCommentPLFromFile():
+#the format of the data is 'Permalink CommentHash'
+def getStringAtIndexFromSaveFile(index):
 	try:
 		saveFile = open(botconfig.botSaveFileLocation,'r')
 	except IOError:
+		print("SaveFile not found")
 		return None
-	commentPL = saveFile.read();
+	fileData = saveFile.read()
+	#this is a sanity check
+	if re.match('\S+\s\S+', fileData) == None:
+		print("MalformatedData in saveFile")
+		return None
 	saveFile.close()
-	return commentPL
+	return string.split(saveFileString,' ')[index]
 
-def setLastCommentPL(toSet):
+def getLastCommentPLFromFile():
+	return getStringAtIndexFromSaveFile(0)
+
+def getHashOfLastPostedCommentFromFile():
+	return getStringAtIndexFromSaveFile(1)
+
+def saveLastCommentPLAndCommentHash(permalink, commentHash):
 	saveFile = open(botconfig.botSaveFileLocation,'w')
-	print(toSet, file=saveFile, end="")
+	print(permalink + " " + commentHash, file=saveFile, end="")
 
 def waitToRefresh():
 	time.sleep(botconfig.botWaitTimeInMinutes * 60)
+
+def getHashOfAboutMe():
+	return hashlib.sha224(config.aboutMe).hexdigest()
 
 def isAboutMeTheNewestSubmission():
 	redditor = r.get_redditor(config.username)
@@ -42,6 +56,8 @@ def isAboutMeTheNewestSubmission():
 	for submission in submitted:
 		submissionTime = submission.created_utc
 	if submissionTime!=None and commentTime!=None and commentTime<submissionTime:
+		return False
+	if getHashOfLastPostedCommentFromFile() != getHashOfAboutMe():
 		return False
 	if commentPL!=None and commentPL==getLastCommentPLFromFile():
 		return True
@@ -58,7 +74,7 @@ def deleteAboutMe():
 def makeAboutMeTheNewestComment():
 		submissionToCommentOn = r.get_submission(config.submissionPermaLink)
 		submissionComment = submissionToCommentOn.add_comment(config.aboutMe)
-		setLastCommentPL(submissionComment.permalink)
+		saveLastCommentPLAndCommentHash(submissionComment.permalink, getHashOfAboutMe())
 
 def init():
 	print('Starting bot..')
